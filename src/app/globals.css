@@ -1,0 +1,617 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   GN Ventures Brand Guidelines: tokens, glass recipe, buttons, brand themes.
+   Site tokens use GN Club / GN Labs style ink values. Per-brand blocks below
+   ([data-brand]) are documentation of each department, scoped to its chapter.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* Site tokens (near-black ink base) */
+  --ink: #08090a;
+  --raised: #111316;
+  --deep: #030404;
+  --lime: #c6f24e;
+  --cyan: #33c7e0;
+  --amber: #f2b84e;
+  --brand-gradient: linear-gradient(90deg, var(--cyan), var(--lime), var(--amber));
+  --fog: #f3f4f0;
+  --fog-dim: #9a9da3;
+  --glass: rgba(255, 255, 255, 0.06);
+  --glass-strong: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --radius: 0.75rem;
+
+  --nav-w: 17rem;
+  --topbar-h: 3.5rem;
+  --content-max: 1200px;
+  --section-gap: clamp(4.5rem, 9vw, 8rem);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-raised: var(--raised);
+  --color-deep: var(--deep);
+  --color-lime: var(--lime);
+  --color-cyan: var(--cyan);
+  --color-amber: var(--amber);
+  --color-fog: var(--fog);
+  --color-fog-dim: var(--fog-dim);
+  --color-glass: var(--glass);
+  --color-glass-strong: var(--glass-strong);
+  --color-glass-border: var(--glass-border);
+  --color-b-bg: var(--b-bg);
+  --color-b-surface: var(--b-surface);
+  --color-b-fg: var(--b-fg);
+  --color-b-muted: var(--b-muted);
+  --color-b-border: var(--b-border);
+  --color-b-accent: var(--b-accent);
+  --color-b-accent-2: var(--b-accent-2);
+  --color-b-accent-3: var(--b-accent-3);
+  --radius-gn: var(--radius);
+  --font-display: var(--font-josefin), "Josefin Sans", sans-serif;
+  --font-sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --font-ui: var(--font-poppins), "Poppins", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* --------------------------------------------------------------------------
+   Per-department themes. Keyed by attribute. Defaults to the umbrella.
+   Variables: --b-bg --b-surface --b-fg --b-muted --b-border --b-accent
+   --b-accent-2 --b-accent-3 --b-accent-fg --b-radius --b-font-display
+   --b-font-body --b-font-ui, plus title controls.
+   -------------------------------------------------------------------------- */
+:root,
+[data-brand="ventures"] {
+  --b-bg: #08090a;
+  --b-surface: #111316;
+  --b-fg: #f3f4f0;
+  --b-muted: #9a9da3;
+  --b-border: rgba(255, 255, 255, 0.14);
+  --b-accent: #c6f24e;
+  --b-accent-2: #33c7e0;
+  --b-accent-3: #f2b84e;
+  --b-accent-fg: #08090a;
+  --b-radius: 0.75rem;
+  --b-font-display: var(--font-josefin), "Josefin Sans", sans-serif;
+  --b-font-body: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --b-font-ui: var(--font-poppins), "Poppins", system-ui, sans-serif;
+  --b-title-weight: 300;
+  --b-title-transform: uppercase;
+  --b-title-tracking: 0.04em;
+  --b-blur: 20px;
+  --b-saturate: 140%;
+}
+
+[data-brand="media"] {
+  --b-bg: #0a0a0f;
+  --b-surface: #0d0d12;
+  --b-fg: #f2f2f0;
+  --b-muted: #8a8f98;
+  --b-border: #ffffff1a;
+  --b-accent: #b0e62f;
+  --b-accent-2: #3ed6d6;
+  --b-accent-3: #f2c14e;
+  --b-accent-fg: #0a0a0f;
+  --b-danger: #f87171;
+  --b-radius: 1rem;
+  --b-blur: 22px;
+  --b-saturate: 165%;
+}
+
+/* Academy: light is the default theme. */
+[data-brand="academy"] {
+  --b-bg: oklch(0.977 0.004 247);
+  --b-surface: #fff;
+  --b-fg: oklch(0.22 0.012 250);
+  --b-muted: color-mix(in oklch, var(--b-fg) 62%, var(--b-bg));
+  --b-border: color-mix(in oklch, var(--b-fg) 14%, transparent);
+  --b-accent: oklch(0.52 0.145 122);
+  --b-accent-2: oklch(0.748 0.135 220);
+  --b-accent-3: oklch(0.665 0.115 79); /* verified credential ONLY */
+  --b-accent-fg: #fff;
+  --b-brand: oklch(0.897 0.192 122); /* neon lime, always with --b-brand-fg */
+  --b-brand-fg: oklch(0.18 0.012 250);
+  --b-danger: oklch(0.55 0.22 27);
+  /* Neon lime fill with dark text for primary buttons (white on lightened deep lime fails 4.5:1). */
+  --b-btn-fill: var(--b-brand);
+  --b-btn-fg: var(--b-brand-fg);
+  /* Generic status badges stay neutral: accent-2/-3 carry restricted meaning here. */
+  --b-tone-2: var(--b-fg);
+  --b-tone-3: var(--b-fg);
+  --b-radius: 0.5rem;
+  --b-title-tracking: 0.05em;
+  color-scheme: light;
+}
+
+[data-brand="academy"][data-theme="dark"] {
+  --b-bg: oklch(0.21 0.032 258);
+  --b-surface: oklch(0.26 0.035 258);
+  --b-fg: oklch(0.977 0.004 247);
+  --b-accent: oklch(0.86 0.19 122);
+  --b-accent-fg: oklch(0.18 0.012 250);
+  --b-danger: oklch(0.72 0.17 25);
+  color-scheme: dark;
+}
+
+[data-brand="club"] {
+  --b-bg: #08090a;
+  --b-surface: #111316;
+  --b-fg: #f3f4f0;
+  --b-muted: #9a9da3;
+  --b-border: rgba(255, 255, 255, 0.14);
+  --b-accent: #c6f24e;
+  --b-accent-2: #33c7e0;
+  --b-accent-3: #f2b84e;
+  --b-accent-fg: #08090a;
+  --b-radius: 0.75rem;
+  --b-blur: 20px;
+  --b-saturate: 140%;
+}
+
+/* Labs: h1 is Manrope semibold, tracking-tight, balanced (not Josefin). */
+[data-brand="labs"] {
+  --b-bg: #050605;
+  --b-surface: #0e120d;
+  --b-fg: #eef3f5;
+  --b-muted: #97a2a8;
+  --b-border: rgba(255, 255, 255, 0.14);
+  --b-accent: #caf14a;
+  --b-accent-2: #17c9e2;
+  --b-accent-3: #f5dc2c;
+  --b-accent-fg: #050605;
+  --b-radius: 0.9rem;
+  --b-font-display: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --b-title-weight: 600;
+  --b-title-transform: none;
+  --b-title-tracking: -0.02em;
+}
+
+/* Mazal: web channel (default) and social kit channel. */
+[data-brand="mazal"],
+[data-brand="mazal"][data-channel="web"] {
+  --b-bg: #000;
+  --b-surface: #0e1220;
+  --b-fg: #fff;
+  --b-muted: rgba(255, 255, 255, 0.72);
+  --b-border: rgba(255, 255, 255, 0.09);
+  --b-accent: #c0f030;
+  --b-accent-2: #0128a9;
+  --b-accent-3: #9eca1d;
+  --b-accent-fg: #020615;
+  --b-tone-2: var(--b-fg);
+  --b-tone-3: var(--b-fg);
+  --b-radius: 1rem;
+  --b-radius-pill: 999px;
+  --b-blur: 26px;
+  --b-saturate: 170%;
+}
+
+[data-brand="mazal"][data-channel="social"] {
+  --b-bg: #04070c;
+  --b-surface: #05090f;
+  --b-fg: #fff;
+  --b-muted: #8f94a8;
+  --b-border: color-mix(in srgb, #fff 9%, transparent);
+  --b-accent: #c0f030;
+  --b-accent-2: #0128a9; /* ambient light only, never text */
+  --b-accent-3: #ff5959; /* stop-loss values only */
+  --b-accent-fg: #04070c;
+  --b-tone-2: var(--b-fg);
+  --b-tone-3: var(--b-fg);
+  --b-radius: 0;
+  --b-font-display: var(--font-archivo), "Archivo", sans-serif;
+  --b-font-body: var(--font-archivo), "Archivo", sans-serif;
+  --b-font-ui: var(--font-archivo), "Archivo", sans-serif;
+  --b-title-weight: 900;
+  --b-title-transform: none;
+  --b-title-tracking: -0.01em;
+}
+
+/* Commune: strictly black and white. Greys only via color-mix of fg over bg. NO glass. */
+[data-brand="commune"] {
+  --b-bg: #000;
+  --b-fg: #fff;
+  --b-surface: color-mix(in srgb, var(--b-fg) 4%, var(--b-bg));
+  --b-muted: color-mix(in srgb, var(--b-fg) 76%, var(--b-bg));
+  --b-subtle: color-mix(in srgb, var(--b-fg) 62%, var(--b-bg));
+  --b-border: color-mix(in srgb, var(--b-fg) 18%, var(--b-bg));
+  --b-line-strong: color-mix(in srgb, var(--b-fg) 38%, var(--b-bg));
+  --b-accent: var(--b-fg);
+  --b-accent-2: var(--b-muted);
+  --b-accent-3: var(--b-subtle);
+  --b-accent-fg: var(--b-bg);
+  --b-danger: var(--b-fg); /* black and white only: errors read through text and icon, not hue */
+  --b-radius: 0.25rem;
+  --b-font-display: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --b-font-body: var(--font-inter), "Inter", system-ui, sans-serif;
+  --b-font-ui: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, monospace;
+  --b-font-hand: var(--font-caveat), "Caveat", cursive;
+  --b-font-wordmark: var(--font-jost), "Jost", sans-serif;
+  --b-title-weight: 300;
+  --b-title-transform: none;
+  --b-title-tracking: -0.01em;
+}
+
+[data-brand="commune"][data-theme="light"] {
+  --b-bg: #fff;
+  --b-fg: #000;
+  --b-surface: color-mix(in srgb, var(--b-fg) 4%, var(--b-bg));
+  --b-muted: color-mix(in srgb, var(--b-fg) 74%, var(--b-bg));
+  --b-border: color-mix(in srgb, var(--b-fg) 16%, var(--b-bg));
+  --b-line-strong: color-mix(in srgb, var(--b-fg) 36%, var(--b-bg));
+  color-scheme: light;
+}
+
+@layer components {
+/* --------------------------------------------------------------------------
+   Base
+   -------------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--topbar-h) + 1rem);
+  background: var(--ink);
+}
+
+/* No body background: html paints --ink so the fixed z:-1 BrandBackground stays visible. */
+body {
+  margin: 0;
+  color: var(--fog);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2 {
+  font-family: var(--b-font-display);
+  font-weight: var(--b-title-weight);
+  text-transform: var(--b-title-transform);
+  letter-spacing: var(--b-title-tracking);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+h3,
+h4 {
+  font-family: var(--b-font-body);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--lime) 70%, transparent);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--b-accent, var(--lime));
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Scrollbar theming */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--lime) 40%, transparent) transparent;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--lime) 35%, var(--raised));
+  border-radius: 999px;
+  border: 2px solid var(--ink);
+}
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -4rem;
+  z-index: 100;
+  padding: 0.75rem 1.25rem;
+  background: var(--lime);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  border-radius: 999px;
+  transition: top 0.2s ease;
+}
+.skip-link:focus { top: 1rem; }
+
+/* content-visibility is intentionally disabled: estimated placeholder heights made
+   anchor jumps (#commune, #downloads) land on the wrong section. Re-enable per
+   section only after measuring real heights. */
+.cv-auto,
+.cv-auto-chapter {
+  content-visibility: visible;
+}
+
+.gn-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--b-accent, var(--lime));
+}
+
+/* --------------------------------------------------------------------------
+   House glass recipe: color-mix over the site's own tokens, blur + saturate,
+   soft top-edge inset highlight, brand-tinted shadow.
+   -------------------------------------------------------------------------- */
+.gn-glass,
+.brand-glass {
+  --_surface: var(--b-surface, var(--raised));
+  --_accent: var(--b-accent, var(--lime));
+  background: color-mix(in srgb, var(--_surface) 58%, transparent);
+  backdrop-filter: blur(var(--b-blur, 22px)) saturate(var(--b-saturate, 160%)) brightness(1.08);
+  -webkit-backdrop-filter: blur(var(--b-blur, 22px)) saturate(var(--b-saturate, 160%)) brightness(1.08);
+  border: 1px solid var(--b-border, var(--glass-border));
+  border-radius: var(--b-radius, var(--radius));
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, #fff 30%, transparent),
+    0 18px 48px -20px color-mix(in srgb, var(--_accent) 32%, transparent);
+}
+
+/* Nav surfaces: ink glass whose opacity comes from --nav-mix, solid under reduced transparency. */
+.gn-glass.gn-nav-surface {
+  background: color-mix(in srgb, var(--ink) var(--nav-mix, 80%), transparent);
+}
+
+/*
+ * Shine sweep. TRAP: the ::after is oversized (inset -20%), so EVERY element
+ * with .gn-shine MUST also carry overflow-hidden (the class enforces it, but
+ * keep the utility on the element too, and grep after batch edits for mangled
+ * identifiers like --gn-shine-delay).
+ */
+.gn-shine {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.gn-shine::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.55) 50%, transparent 62%);
+  mix-blend-mode: soft-light;
+  opacity: 0.55;
+  transform: translateX(-10%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .gn-shine::after {
+    transform: translateX(-60%);
+    animation: gn-shine-sweep 7s ease-in-out infinite;
+    animation-delay: var(--gn-shine-delay, 0s);
+  }
+}
+@keyframes gn-shine-sweep {
+  0% { transform: translateX(-60%); }
+  55%, 100% { transform: translateX(60%); }
+}
+
+.gn-zoom {
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gn-zoom:hover { transform: scale(1.03); }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .gn-glass,
+  .brand-glass {
+    background: var(--b-surface, var(--raised));
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .gn-glass.gn-nav-surface { background: var(--ink); }
+  .gn-shine::after { display: none; }
+}
+
+/* Brand surface helper: paints a chapter in its own tokens. */
+.brand-surface {
+  background: var(--b-bg);
+  color: var(--b-fg);
+  font-family: var(--b-font-body);
+}
+
+/* --------------------------------------------------------------------------
+   Buttons: brighter, lighter, shinier. Tuned per variant, tinted by --b-accent.
+   -------------------------------------------------------------------------- */
+.gn-btn {
+  --_a: var(--b-accent, var(--lime));
+  --_afg: var(--b-accent-fg, var(--ink));
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.5rem;
+  font-family: var(--b-font-ui, var(--font-ui));
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: var(--b-radius-pill, 999px);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease;
+}
+.gn-btn:active { transform: translateY(1px) scale(0.99); }
+.gn-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.gn-btn::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.7) 50%, transparent 60%);
+  mix-blend-mode: soft-light;
+  opacity: 0.6;
+  transform: translateX(-10%);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .gn-btn::after {
+    transform: translateX(-60%);
+    animation: gn-shine-sweep 6s ease-in-out infinite;
+    animation-delay: var(--gn-shine-delay, 0s);
+  }
+}
+
+.gn-btn-primary {
+  --_a: var(--b-btn-fill, var(--b-accent, var(--lime)));
+  --_afg: var(--b-btn-fg, var(--b-accent-fg, var(--ink)));
+  color: var(--_afg);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--_a) 62%, #fff) 0%,
+    color-mix(in srgb, var(--_a) 92%, #fff) 48%,
+    var(--_a) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 color-mix(in srgb, var(--_a) 60%, #000),
+    0 10px 28px -8px color-mix(in srgb, var(--_a) 70%, transparent);
+}
+.gn-btn-primary:hover { filter: brightness(1.08) saturate(1.1); }
+
+.gn-btn-secondary {
+  color: var(--b-fg, var(--fog));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--_a) 26%, rgba(255, 255, 255, 0.14)),
+    color-mix(in srgb, var(--_a) 10%, rgba(255, 255, 255, 0.06))
+  );
+  border: 1px solid color-mix(in srgb, var(--_a) 45%, transparent);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 8px 24px -10px color-mix(in srgb, var(--_a) 50%, transparent);
+}
+.gn-btn-secondary:hover { border-color: var(--_a); filter: brightness(1.12); }
+
+.gn-btn-outline {
+  color: color-mix(in srgb, var(--_a) 70%, var(--b-fg, var(--fog)));
+  background: color-mix(in srgb, var(--_a) 6%, transparent);
+  border: 1.5px solid color-mix(in srgb, var(--_a) 70%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.gn-btn-outline:hover {
+  background: color-mix(in srgb, var(--_a) 16%, transparent);
+  border-color: var(--_a);
+  color: var(--b-fg, var(--fog));
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .gn-btn-secondary { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--b-surface, var(--raised)); }
+  .gn-btn::after { display: none; }
+}
+
+/* Uppercase tracked nav (0.1em to 0.12em). */
+.gn-nav-link {
+  font-family: var(--font-ui);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* --------------------------------------------------------------------------
+   Commune sketchbook helpers. Black and white only. No glass.
+   -------------------------------------------------------------------------- */
+[data-brand="commune"] .brand-glass,
+[data-brand="commune"] .gn-glass {
+  background: var(--b-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 2px solid var(--b-fg);
+  box-shadow: 4px 4px 0 var(--b-fg);
+}
+[data-brand="commune"] .gn-shine::after,
+[data-brand="commune"] .gn-btn::after { display: none; }
+[data-brand="commune"] .gn-btn {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  letter-spacing: 0.04em;
+  border: 2px solid var(--b-fg);
+  box-shadow: 3px 3px 0 var(--b-fg);
+}
+[data-brand="commune"] .gn-btn-primary {
+  background: var(--b-fg);
+  color: var(--b-bg);
+  filter: none;
+}
+[data-brand="commune"] .gn-btn-secondary,
+[data-brand="commune"] .gn-btn-outline {
+  background: var(--b-bg);
+  color: var(--b-fg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.sk-wobble { border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; }
+.sk-wobble-2 { border-radius: 15px 225px 15px 255px / 255px 15px 225px 15px; }
+.sk-ink { border: 2px solid var(--b-fg); }
+.sk-shadow { box-shadow: 4px 4px 0 var(--b-fg); }
+.sk-rot-l { transform: rotate(-2deg); }
+.sk-rot-r { transform: rotate(2deg); }
+.sk-dotted-bg {
+  background-color: var(--b-bg);
+  background-image: radial-gradient(color-mix(in srgb, var(--b-fg) 28%, transparent) 1px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+.sk-dashed { border: 0; border-top: 2px dashed var(--b-line-strong, var(--b-fg)); }
+.sk-dotted { border: 0; border-top: 2px dotted var(--b-line-strong, var(--b-fg)); }
+.sk-tape {
+  position: relative;
+}
+.sk-tape::before {
+  content: "";
+  position: absolute;
+  top: -0.7rem;
+  left: 50%;
+  width: 5rem;
+  height: 1.4rem;
+  transform: translateX(-50%) rotate(-3deg);
+  background: color-mix(in srgb, var(--b-fg) 14%, var(--b-bg));
+  border: 1px dashed var(--b-line-strong, var(--b-fg));
+}
+
+/* Mazal social kit plate: navy gradient, off-canvas lights, halftone dots, grid. */
+.mazal-plate {
+  background:
+    radial-gradient(60% 50% at 0% 0%, color-mix(in srgb, #c0f030 22%, transparent), transparent 70%),
+    radial-gradient(60% 50% at 100% 100%, color-mix(in srgb, #0128a9 38%, transparent), transparent 70%),
+    radial-gradient(color-mix(in srgb, #fff 8%, transparent) 1px, transparent 1.4px) 0 0 / 16px 16px,
+    linear-gradient(color-mix(in srgb, #fff 4%, transparent) 1px, transparent 1px) 0 0 / 100px 100px,
+    linear-gradient(90deg, color-mix(in srgb, #fff 4%, transparent) 1px, transparent 1px) 0 0 / 100px 100px,
+    linear-gradient(135deg, #04070c, #05090f);
+}
+
+/* Reduced motion: nothing animates, smooth scroll off. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Toast */
+@keyframes gn-toast-in {
+  from { opacity: 0; transform: translate(-50%, 12px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.gn-toast { animation: gn-toast-in 0.22s ease-out both; }
+}

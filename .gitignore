@@ -1,0 +1,18 @@
+# dependencies
+node_modules
+
+# next
+.next
+out
+next-env.d.ts
+*.tsbuildinfo
+
+# env (never commit secrets)
+.env*
+
+# misc
+.DS_Store
+npm-debug.log*
+
+# Internal build spec (names a third-party reference page); keep local
+docs/BRAND-SPEC.md
