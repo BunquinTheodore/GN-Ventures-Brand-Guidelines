@@ -19,7 +19,7 @@ export interface PlateInputTracker {
  * tilts toward the pointer wherever it is), drag to spin, double click reset.
  * Listeners are removed by `dispose`.
  */
-export function createPlateInput(container: HTMLElement): PlateInputTracker {
+export function createPlateInput(container: HTMLElement, onActivity: () => void = () => undefined): PlateInputTracker {
   let pointerX = 0;
   let pointerY = 0;
   let dragging = false;
@@ -44,6 +44,7 @@ export function createPlateInput(container: HTMLElement): PlateInputTracker {
       lastX = event.clientX;
       lastY = event.clientY;
     }
+    onActivity();
   };
 
   const onDown = (event: PointerEvent): void => {
@@ -52,6 +53,7 @@ export function createPlateInput(container: HTMLElement): PlateInputTracker {
     activeId = event.pointerId;
     lastX = event.clientX;
     lastY = event.clientY;
+    onActivity();
     try {
       container.setPointerCapture(event.pointerId);
     } catch {
@@ -67,14 +69,17 @@ export function createPlateInput(container: HTMLElement): PlateInputTracker {
       pointerX = 0;
       pointerY = 0;
     }
+    onActivity();
   };
 
   const onLeave = (): void => {
     pointerX = 0;
     pointerY = 0;
+    onActivity();
   };
   const onDouble = (): void => {
     pendingReset = true;
+    onActivity();
   };
 
   window.addEventListener('pointermove', onWindowMove, { passive: true });
@@ -94,6 +99,7 @@ export function createPlateInput(container: HTMLElement): PlateInputTracker {
     },
     requestReset() {
       pendingReset = true;
+      onActivity();
     },
     dispose() {
       window.removeEventListener('pointermove', onWindowMove);

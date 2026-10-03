@@ -5,6 +5,7 @@ import DerivedTag from "@/components/ui/DerivedTag";
 import { LazyLogoViewer3D } from "@/components/three";
 import { getAsset } from "@/content/assets";
 import { BRANDS } from "@/content/brands";
+import { thumbFor } from "@/content/thumbs";
 import type { BrandId } from "@/content/types";
 import { LogoImg, SubHead } from "./parts";
 
@@ -21,7 +22,7 @@ const ANATOMY: readonly { readonly n: string; readonly title: string; readonly b
 function viewerItems() {
   return VIEWER_ORDER.flatMap((id) => {
     const asset = getAsset(`${id}-primary-dark`);
-    return asset ? [{ id, label: BRANDS[id].name, src: asset.file }] : [];
+    return asset ? [{ id, label: BRANDS[id].name, src: asset.file, thumb: thumbFor(id) }] : [];
   });
 }
 
@@ -47,7 +48,7 @@ export default function Logo() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <GlowCard className="grid gap-6 sm:grid-cols-[minmax(0,14rem)_1fr] sm:items-center">
           <div className="mx-auto w-full max-w-[14rem] overflow-hidden rounded-[var(--b-radius)] bg-black">
-            <LogoImg id="ventures-primary-dark" alt="GN Ventures logo" sizes="224px" priority />
+            <LogoImg id="ventures-primary-dark" alt="GN Ventures logo" sizes="224px" />
           </div>
           <div>
             <SubHead aside={<DerivedTag kind="original" note="Original raster file from the owner" />}>Lockup anatomy</SubHead>

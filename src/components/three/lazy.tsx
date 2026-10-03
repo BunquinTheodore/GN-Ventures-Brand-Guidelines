@@ -1,13 +1,16 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { HeroLogo3DProps } from './HeroLogo3D';
 import type { LogoViewer3DProps } from './LogoViewer3D';
 
 /** Max wait before the background mounts even without any user input. */
 const IDLE_TIMEOUT_MS = 2500;
 const INPUT_EVENTS = ['pointerdown', 'pointermove', 'keydown', 'touchstart', 'wheel', 'scroll'] as const;
+
+/** The viewer's chunk and WebGL context load only once its slot is this close to the viewport. */
+const VIEWER_ROOT_MARGIN = '800px 0px';
 
 const BrandBackgroundChunk = dynamic(() => import('./BrandBackground'), { ssr: false, loading: () => null });
 
@@ -90,6 +93,25 @@ export function LazyHeroLogo3D({ src, alt, className }: Pick<HeroLogo3DProps, 's
   );
 }
 
+/** Mounts the 3D viewer (chunk, texture, WebGL context) only when it is near the viewport. */
 export function LazyLogoViewer3D(props: LogoViewer3DProps) {
-  return <LogoViewer3DChunk {...props} />;
+  const slotRef = useRef<HTMLDivElement>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const slot = slotRef.current;
+    if (!slot || near) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setNear(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) setNear(true);
+      },
+      { rootMargin: VIEWER_ROOT_MARGIN },
+    );
+    observer.observe(slot);
+    return () => observer.disconnect();
+  }, [near]);
+  return near ? <LogoViewer3DChunk {...props} /> : <div ref={slotRef}><ViewerPlaceholder /></div>;
 }

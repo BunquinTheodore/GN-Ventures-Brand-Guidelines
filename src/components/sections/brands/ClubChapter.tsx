@@ -1,4 +1,5 @@
 import BrandChapter from "./BrandChapter";
+import type { ChapterPartKey } from "./parts/shared";
 import ActivationShowcase from "./club/ActivationShowcase";
 import AgencyVoice from "./club/AgencyVoice";
 import FullColorRule from "./club/FullColorRule";
@@ -11,10 +12,11 @@ import TaglineRail from "./club/TaglineRail";
  * glass at blur 20 and saturate 140, staggered shine, full-color imagery.
  * Composes the shared template and adds Club-only live demos.
  */
-export default function ClubChapter() {
+export default function ClubChapter({ onlyPart }: { readonly onlyPart?: ChapterPartKey }) {
   return (
     <BrandChapter
       brand="club"
+      onlyPart={onlyPart}
       extras={{
         essence: <TaglineRail />,
         logo: <LogoStyles />,

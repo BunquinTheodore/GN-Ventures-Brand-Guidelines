@@ -1,5 +1,6 @@
 import { SubHeading } from "./parts";
 import BrandChapter from "./BrandChapter";
+import type { ChapterPartKey } from "./parts/shared";
 import { ChannelDecision, ChannelTable, Endorsement } from "./mazal/Channels";
 import MarkLab from "./mazal/MarkLab";
 import MazalComponents from "./mazal/MazalComponents";
@@ -28,9 +29,9 @@ const EXTRAS = {
 } as const;
 
 /** Mazal, a GN Ventures department. Web channel and social kit channel, with the conflict left as an open decision. */
-export default function MazalChapter() {
+export default function MazalChapter({ onlyPart }: { readonly onlyPart?: ChapterPartKey }) {
   return (
-    <BrandChapter brand="mazal" lead={LEAD} overrides={{ components: MazalComponents }} extras={EXTRAS}>
+    <BrandChapter brand="mazal" onlyPart={onlyPart} lead={LEAD} overrides={{ components: MazalComponents }} extras={EXTRAS}>
       <ChannelDecision />
     </BrandChapter>
   );

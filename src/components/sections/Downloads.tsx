@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ASSETS, MISSING_ASSETS, VECTOR_STATUS } from "@/content/assets";
 import type { AssetBg, AssetKind, BrandAsset } from "@/content/asset-types";
 import { BRANDS, BRAND_ORDER } from "@/content/brands";
 import { formatBytes } from "@/content/fonts";
 import { FONTS_TOTAL_BYTES } from "@/content/fonts-manifest";
+import { previewFor } from "@/content/previews";
 import type { BrandId } from "@/content/types";
 import { Badge, Button, DerivedTag, GlowCard, SectionShell } from "@/components/ui";
 import { sfx } from "@/lib/sfx";
@@ -54,6 +55,9 @@ const CHECKER_STYLE: CSSProperties = {
 
 const PREVIEW_ORDER = ["png", "svg", "webp", "jpg", "ico", "pdf"] as const;
 
+/** Cards rendered up front, and added per "Show more" click. Keeps the DOM small. */
+const PAGE_SIZE = 24;
+
 interface AssetGroup {
   readonly key: string;
   readonly brand: BrandId;
@@ -67,7 +71,8 @@ interface AssetGroup {
 }
 
 function pickPreview(files: readonly BrandAsset[]): BrandAsset {
-  const rank = (a: BrandAsset) => PREVIEW_ORDER.indexOf(a.format);
+  // A file with a small generated preview wins over one that would load at full size.
+  const rank = (a: BrandAsset) => (previewFor(a.id) ? 0 : 10) + PREVIEW_ORDER.indexOf(a.format);
   return [...files].sort((a, b) => rank(a) - rank(b))[0] ?? files[0]!;
 }
 
@@ -116,27 +121,30 @@ function PreviewBox({ group }: { readonly group: AssetGroup }) {
       : group.bg === "light"
         ? "bg-[var(--fog)]"
         : "";
-  const w = preview.width ?? 256;
-  const h = preview.height ?? 256;
+  const small = previewFor(preview.id);
+  const src = small?.src ?? preview.file;
+  const w = small?.width ?? preview.width ?? 256;
+  const h = small?.height ?? preview.height ?? 256;
   return (
     <div
       className={cn("flex h-44 items-center justify-center overflow-hidden rounded-lg border border-[var(--b-border)] p-3", surface)}
       style={group.bg === "transparent" ? (inkOnTransparent(preview) ? LIGHT_CHECKER_STYLE : CHECKER_STYLE) : undefined}
     >
       <Image
-        src={preview.file}
+        src={src}
         alt={`${preview.label}, preview`}
         width={w}
         height={h}
         unoptimized
         loading="lazy"
+        decoding="async"
         className="max-h-full w-auto max-w-full object-contain"
       />
     </div>
   );
 }
 
-function AssetCard({ group, index }: { readonly group: AssetGroup; readonly index: number }) {
+function AssetCard({ group, index, headingId }: { readonly group: AssetGroup; readonly index: number; readonly headingId: string }) {
   const [open, setOpen] = useState(false);
   const { preview } = group;
   const vector = VECTOR_STATUS[group.brand];
@@ -147,7 +155,7 @@ function AssetCard({ group, index }: { readonly group: AssetGroup; readonly inde
     <GlowCard as="article" zoom shineDelay={(index % 6) * 0.5} className="flex flex-col gap-4 !p-4">
       <PreviewBox group={group} />
       <div className="space-y-2">
-        <h3 className="font-sans text-base font-semibold normal-case leading-snug tracking-normal">{group.title}</h3>
+        <h3 id={headingId} tabIndex={-1} className="font-sans text-base font-semibold normal-case leading-snug tracking-normal focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--b-accent)]">{group.title}</h3>
         <div className="flex flex-wrap items-center gap-1.5">
           <Badge tone="neutral">{BRANDS[group.brand].name}</Badge>
           <DerivedTag kind={group.source} />
@@ -313,6 +321,25 @@ export default function Downloads() {
   const visible = useMemo(() => byBrand.filter((a) => activeKind === "all" || a.kind === activeKind), [byBrand, activeKind]);
   const groups = useMemo(() => buildGroups(visible), [visible]);
 
+  // Reveal count is tied to the active filter, so changing a filter starts again at one page.
+  const filterKey = `${brand}|${activeKind}`;
+  const [reveal, setReveal] = useState({ key: filterKey, count: PAGE_SIZE });
+  const shown = Math.min(reveal.key === filterKey ? reveal.count : PAGE_SIZE, groups.length);
+  const focusIndex = useRef<number | null>(null);
+  const remaining = groups.length - shown;
+
+  const showMore = () => {
+    focusIndex.current = shown;
+    setReveal({ key: filterKey, count: shown + PAGE_SIZE });
+  };
+
+  useEffect(() => {
+    if (focusIndex.current === null) return;
+    const target = document.getElementById(`dl-card-${focusIndex.current}`);
+    focusIndex.current = null;
+    target?.focus({ preventScroll: false });
+  }, [shown]);
+
   return (
     <SectionShell
       id="downloads"
@@ -341,15 +368,24 @@ export default function Downloads() {
           ))}
         </div>
         <p role="status" className="text-sm text-[var(--b-muted)]">
-          Showing {groups.length} cards, {visible.length} files.
+          {shown < groups.length
+            ? `Showing ${shown} of ${groups.length} cards, ${visible.length} files.`
+            : `Showing ${groups.length} cards, ${visible.length} files.`}
         </p>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-        {groups.map((g, i) => (
-          <AssetCard key={g.key} group={g} index={i} />
+        {groups.slice(0, shown).map((g, i) => (
+          <AssetCard key={g.key} group={g} index={i} headingId={`dl-card-${i}`} />
         ))}
       </div>
+      {remaining > 0 ? (
+        <div className="flex justify-center">
+          <Button variant="outline" onClick={showMore} data-sfx="nav" className="min-h-11 px-6 text-xs">
+            Show {Math.min(PAGE_SIZE, remaining)} more ({remaining} not shown)
+          </Button>
+        </div>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <MissingNote />

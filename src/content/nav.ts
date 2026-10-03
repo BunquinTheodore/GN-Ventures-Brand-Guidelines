@@ -42,12 +42,13 @@ export const NAV_PARTS: readonly NavPart[] = [
     title: "The family",
     sections: [
       s(22, "family", "The family"),
-      s(23, "media", "GN Media", "media"),
-      s(24, "academy", "GN Academy", "academy"),
-      s(25, "club", "GN Club", "club"),
-      s(26, "labs", "GN Labs", "labs"),
-      s(27, "mazal", "Mazal", "mazal"),
-      s(28, "commune", "GN Commune", "commune"),
+      s(23, "departments", "Departments sheet"),
+      s(24, "media", "GN Media", "media"),
+      s(25, "academy", "GN Academy", "academy"),
+      s(26, "club", "GN Club", "club"),
+      s(27, "labs", "GN Labs", "labs"),
+      s(28, "mazal", "Mazal", "mazal"),
+      s(29, "commune", "GN Commune", "commune"),
     ],
   },
   {
@@ -55,8 +56,8 @@ export const NAV_PARTS: readonly NavPart[] = [
     label: "Part III",
     title: "Resources",
     sections: [
-      s(29, "fonts", "Fonts"),
-      s(30, "downloads", "Downloads"),
+      s(30, "fonts", "Fonts"),
+      s(31, "downloads", "Downloads"),
     ],
   },
 ];

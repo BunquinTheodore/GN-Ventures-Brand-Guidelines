@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import ShineObserver from "./ShineObserver";
 
 interface GlowCardProps {
   readonly children: ReactNode;
@@ -19,7 +20,8 @@ export default function GlowCard({ children, className, zoom = false, as: Tag = 
     ...(shineDelay !== undefined ? ({ "--gn-shine-delay": `${shineDelay}s` } as CSSProperties) : null),
   };
   return (
-    <Tag className={cn("gn-glass gn-shine overflow-hidden p-5 md:p-6", zoom && "gn-zoom", className)} style={merged}>
+    <Tag className={cn("gn-glass gn-card gn-shine overflow-hidden p-5 md:p-6", zoom && "gn-zoom", className)} style={merged}>
+      <ShineObserver />
       {children}
     </Tag>
   );

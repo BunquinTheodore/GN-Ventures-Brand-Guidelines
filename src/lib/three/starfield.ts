@@ -24,9 +24,9 @@ interface LayerSpec {
 
 /** Near layers move more, far layers less, which reads as depth. */
 const LAYERS: readonly LayerSpec[] = [
-  { count: 240, innerRadius: 26, outerRadius: 42, size: 1.5, drift: 0.006, parallax: 1 },
-  { count: 300, innerRadius: 44, outerRadius: 72, size: 2.1, drift: 0.003, parallax: 0.6 },
-  { count: 300, innerRadius: 76, outerRadius: 130, size: 3.0, drift: 0.0015, parallax: 0.3 },
+  { count: 130, innerRadius: 26, outerRadius: 42, size: 1.5, drift: 0.006, parallax: 1 },
+  { count: 150, innerRadius: 44, outerRadius: 72, size: 2.1, drift: 0.003, parallax: 0.6 },
+  { count: 130, innerRadius: 76, outerRadius: 130, size: 3.0, drift: 0.0015, parallax: 0.3 },
 ];
 
 export interface Starfield {

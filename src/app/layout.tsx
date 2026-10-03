@@ -17,7 +17,8 @@ import "./globals.css";
 const josefin = Josefin_Sans({ subsets: ["latin"], weight: ["300", "400"], display: "swap", variable: "--font-josefin" });
 const manrope = Manrope({ subsets: ["latin"], display: "swap", variable: "--font-manrope" });
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600"], display: "swap", variable: "--font-poppins" });
-const geistMono = Geist_Mono({ subsets: ["latin"], display: "swap", variable: "--font-geist-mono" });
+/* Geist Mono only sets numerals: not worth a head preload. */
+const geistMono = Geist_Mono({ subsets: ["latin"], display: "swap", preload: false, variable: "--font-geist-mono" });
 
 /* Secondary families (Mazal social kit, Commune): not preloaded. next/font needs literal options. */
 const archivo = Archivo({ subsets: ["latin"], display: "swap", preload: false, variable: "--font-archivo" });
@@ -29,7 +30,12 @@ const plexMono = IBM_Plex_Mono({ subsets: ["latin"], display: "swap", preload: f
 const DESCRIPTION =
   "Brand guidelines for GN Ventures and its six departments: Media, Academy, Club, Labs, Mazal and Commune. Logo, color, type, voice and downloads.";
 
+const SITE_URL = "https://gn-ventures-brand-guidelines.vercel.app";
+
+/* The link preview (opengraph-image.png, twitter-image.png) and the tab icons (favicon.ico,
+   icon.png, apple-icon.png) live in this folder and are the GN Ventures logo. */
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "GN Ventures Brand Guidelines",
   description: DESCRIPTION,
   applicationName: "GN Ventures Brand Guidelines",

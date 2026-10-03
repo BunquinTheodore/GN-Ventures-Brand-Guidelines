@@ -347,9 +347,12 @@ h4 {
 .brand-glass {
   --_surface: var(--b-surface, var(--raised));
   --_accent: var(--b-accent, var(--lime));
-  background: color-mix(in srgb, var(--_surface) 58%, transparent);
-  backdrop-filter: blur(var(--b-blur, 22px)) saturate(var(--b-saturate, 160%)) brightness(1.08);
-  -webkit-backdrop-filter: blur(var(--b-blur, 22px)) saturate(var(--b-saturate, 160%)) brightness(1.08);
+  /* PERF: cards are a translucent fill + top light + tinted shadow, NO backdrop-filter
+     (80+ blur layers over an animating WebGL canvas was the main lag source). Only nav
+     surfaces and .gn-glass-blur containers blur. Fill is a little denser to compensate. */
+  background:
+    linear-gradient(180deg, color-mix(in srgb, #fff 7%, transparent), transparent 42%),
+    color-mix(in srgb, var(--_surface) 72%, transparent);
   border: 1px solid var(--b-border, var(--glass-border));
   border-radius: var(--b-radius, var(--radius));
   box-shadow:
@@ -357,10 +360,21 @@ h4 {
     0 18px 48px -20px color-mix(in srgb, var(--_accent) 32%, transparent);
 }
 
-/* Nav surfaces: ink glass whose opacity comes from --nav-mix, solid under reduced transparency. */
+/* Nav surfaces (and opt-in large containers via .gn-glass-blur): the only real blur layers.
+   Radius capped at 16px, no brightness(), never nested. */
 .gn-glass.gn-nav-surface {
   background: color-mix(in srgb, var(--ink) var(--nav-mix, 80%), transparent);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
+.gn-glass.gn-glass-blur {
+  backdrop-filter: blur(10px) saturate(130%);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+}
+
+/* Leaf cards (GlowCard): isolate layout/paint/style so a hover or shine change never
+   invalidates the rest of the page. Safe: .gn-shine already clips with overflow hidden. */
+.gn-card { contain: layout paint style; }
 
 /*
  * Shine sweep. TRAP: the ::after is oversized (inset -20%), so EVERY element
@@ -384,11 +398,26 @@ h4 {
   opacity: 0.55;
   transform: translateX(-10%);
 }
+/* PERF: the sweep only animates transform, and only runs while the element is on screen
+   (data-visible set by the shared observer in useShineVisibility) or hovered/focused.
+   Paused otherwise, and paused for every element when the tab is hidden. Off-screen or
+   pre-hydration it rests on the static highlight. will-change only while running. */
 @media (prefers-reduced-motion: no-preference) {
   .gn-shine::after {
     transform: translateX(-60%);
-    animation: gn-shine-sweep 7s ease-in-out infinite;
+    animation: gn-shine-sweep 7s ease-in-out infinite paused;
     animation-delay: var(--gn-shine-delay, 0s);
+  }
+  .gn-shine[data-visible="1"]::after,
+  .gn-shine:hover::after,
+  .gn-shine:focus-within::after {
+    animation-play-state: running;
+    will-change: transform;
+  }
+  html[data-doc-hidden="1"] .gn-shine::after,
+  html[data-doc-hidden="1"] .gn-btn::after {
+    animation-play-state: paused !important;
+    will-change: auto;
   }
 }
 @keyframes gn-shine-sweep {
@@ -397,7 +426,7 @@ h4 {
 }
 
 .gn-zoom {
-  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.35s ease;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {
   .gn-zoom:hover { transform: scale(1.03); }
@@ -410,12 +439,24 @@ h4 {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
+  .gn-glass.gn-nav-surface,
+  .gn-glass.gn-glass-blur {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
   .gn-glass.gn-nav-surface { background: var(--ink); }
   .gn-shine::after { display: none; }
 }
 
+/* Bare "grid" utilities get an implicit auto column that min-content can blow out past the
+   viewport. Give them a shrinkable single column by default; any grid-cols-* utility still wins. */
+@layer base {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* Brand surface helper: paints a chapter in its own tokens. */
 .brand-surface {
+  overflow-x: clip;
   background: var(--b-bg);
   color: var(--b-fg);
   font-family: var(--b-font-body);
@@ -444,7 +485,7 @@ h4 {
   border-radius: var(--b-radius-pill, 999px);
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease;
+  transition: transform 0.2s ease, filter 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 .gn-btn:active { transform: translateY(1px) scale(0.99); }
 .gn-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
@@ -461,8 +502,15 @@ h4 {
 @media (prefers-reduced-motion: no-preference) {
   .gn-btn::after {
     transform: translateX(-60%);
-    animation: gn-shine-sweep 6s ease-in-out infinite;
+    animation: gn-shine-sweep 6s ease-in-out infinite paused;
     animation-delay: var(--gn-shine-delay, 0s);
+  }
+  /* Buttons sweep on hover/focus only (they rest on the static highlight), so dozens of
+     buttons never animate at once. */
+  .gn-btn:hover::after,
+  .gn-btn:focus-visible::after {
+    animation-play-state: running;
+    will-change: transform;
   }
 }
 
@@ -487,12 +535,11 @@ h4 {
   color: var(--b-fg, var(--fog));
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--_a) 26%, rgba(255, 255, 255, 0.14)),
-    color-mix(in srgb, var(--_a) 10%, rgba(255, 255, 255, 0.06))
+    color-mix(in srgb, var(--_a) 30%, rgba(255, 255, 255, 0.16)),
+    color-mix(in srgb, var(--_a) 14%, rgba(255, 255, 255, 0.08))
   );
   border: 1px solid color-mix(in srgb, var(--_a) 45%, transparent);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  /* PERF: no backdrop-filter on buttons; the denser translucent gradient carries the glass. */
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     0 8px 24px -10px color-mix(in srgb, var(--_a) 50%, transparent);
@@ -512,7 +559,7 @@ h4 {
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .gn-btn-secondary { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--b-surface, var(--raised)); }
+  .gn-btn-secondary { background: var(--b-surface, var(--raised)); }
   .gn-btn::after { display: none; }
 }
 
@@ -614,4 +661,99 @@ h4 {
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 .gn-toast { animation: gn-toast-in 0.22s ease-out both; }
+}
+
+/* ==========================================================================
+   Departments sheet (spreadsheet of departments x parts). Owned by the
+   departments sheet component; safe to delete with it.
+   ========================================================================== */
+.dsheet-scroll {
+  scroll-padding-left: 8.5rem;
+  scroll-padding-top: 2.75rem;
+}
+.dsheet-grid {
+  --dsheet-first: 8.5rem;
+  --dsheet-col: 10rem;
+  min-width: calc(var(--dsheet-first) + 6 * var(--dsheet-col));
+}
+.dsheet-row {
+  display: grid;
+  grid-template-columns: var(--dsheet-first) repeat(6, minmax(var(--dsheet-col), 1fr));
+  border-bottom: 1px solid var(--glass-border);
+}
+.dsheet-row:last-child { border-bottom: 0; }
+.dsheet-rowhead-wrap {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  background: color-mix(in srgb, var(--raised) 94%, var(--lime));
+  border-right: 1px solid var(--glass-border);
+  color: var(--fog-dim);
+}
+.dsheet-corner { padding: 0 0.75rem; min-height: 2.75rem; }
+.dsheet-colhead-wrap { display: flex; border-right: 1px solid var(--glass-border); background: color-mix(in srgb, var(--raised) 94%, var(--lime)); }
+.dsheet-colhead-wrap:last-child { border-right: 0; }
+.dsheet-head { color: var(--fog-dim); cursor: pointer; background: transparent; text-align: left; }
+.dsheet-head:hover { color: var(--fog); }
+.dsheet-head[data-selected="true"] {
+  color: var(--fog);
+  background: color-mix(in srgb, var(--lime) 16%, transparent);
+}
+.dsheet-colhead[data-selected="true"] { box-shadow: inset 0 -3px 0 var(--dsheet-accent, var(--lime)); }
+.dsheet-rowhead[data-selected="true"] { box-shadow: inset 3px 0 0 var(--lime); }
+.dsheet-cell {
+  position: relative;
+  display: flex;
+  min-height: 5.75rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  border: 0;
+  border-right: 1px solid var(--glass-border);
+  background: transparent;
+  cursor: cell;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+.dsheet-cell:last-child { border-right: 0; }
+.dsheet-cell:hover { background: color-mix(in srgb, #fff 5%, transparent); }
+.dsheet-cell[data-selected="true"] {
+  z-index: 2;
+  background: color-mix(in srgb, var(--dsheet-accent, var(--lime)) 12%, transparent);
+  outline: 2px solid var(--dsheet-accent, var(--lime));
+  outline-offset: -2px;
+}
+.dsheet-cell:focus-visible { outline: 3px solid var(--fog); outline-offset: -3px; }
+.dsheet-handle {
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--dsheet-accent, var(--lime));
+  border: 1px solid var(--ink);
+}
+/* Commune stays black and white sketchbook: dashed lines, no glass, no hue. */
+.dsheet-ink,
+.dsheet-cell.dsheet-ink {
+  border-right-style: dashed;
+  --dsheet-accent: #fff;
+}
+.dsheet-colhead.dsheet-ink {
+  background: #000;
+  color: #fff;
+  border-left: 2px dashed #fff;
+}
+.dsheet-cell.dsheet-ink {
+  background: #000;
+  border-left: 2px dashed color-mix(in srgb, #fff 70%, transparent);
+  backdrop-filter: none;
+}
+.dsheet-cell.dsheet-ink[data-selected="true"] { outline-style: dashed; background: #000; }
+@media (prefers-reduced-motion: reduce) {
+  .dsheet-cell { transition: none; }
 }

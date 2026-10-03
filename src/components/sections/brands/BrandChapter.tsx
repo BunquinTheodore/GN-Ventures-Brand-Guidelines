@@ -77,6 +77,11 @@ export interface BrandChapterProps {
   readonly title?: string;
   readonly eyebrow?: string;
   readonly lead?: ReactNode;
+  /**
+   * Render one part only (departments sheet detail pane): a themed frame with the chapter header,
+   * that part and its extras. Brand-specific children show under Applications. No SectionShell title.
+   */
+  readonly onlyPart?: ChapterPartKey;
 }
 
 function visibleParts(overrides: BrandChapterProps["overrides"]): readonly ChapterPartKey[] {
@@ -131,6 +136,35 @@ function SubNav({ brand, parts }: { readonly brand: BrandId; readonly parts: rea
   );
 }
 
+function PartOnlyView({
+  brand, part, overrides, extras, glass, switchConfig, brandExtra,
+}: {
+  readonly brand: BrandId;
+  readonly part: ChapterPartKey;
+  readonly overrides: BrandChapterProps["overrides"];
+  readonly extras: BrandChapterProps["extras"];
+  readonly glass: boolean;
+  readonly switchConfig?: ChapterSwitchConfig;
+  readonly brandExtra: ReactNode;
+}) {
+  const Part = overrides?.[part] ?? DEFAULT_PARTS[part];
+  return (
+    <div
+      id={brand}
+      data-brand={brand}
+      data-only-part={part}
+      className={`brand-surface scroll-mt-20 space-y-8 rounded-[1.5rem] border border-[var(--b-border)] p-5 sm:p-8 lg:p-12${
+        brand === "commune" ? " sk-dotted-bg" : ""
+      }`}
+    >
+      <ChapterHeader brand={brand} switcher={switchConfig} />
+      <Part brand={brand} glass={glass} />
+      {extras?.[part]}
+      {part === "applications" ? brandExtra : null}
+    </div>
+  );
+}
+
 /**
  * The complete department mini-guide. Wraps a themed SectionShell (data-brand on the section,
  * data-theme or data-channel set by the switch), a chapter header, a local sub-nav and the
@@ -146,6 +180,7 @@ export default function BrandChapter({
   title,
   eyebrow = "Department",
   lead,
+  onlyPart,
 }: BrandChapterProps) {
   const b = brandOf(brand);
   const section = findSection(brand);
@@ -153,6 +188,20 @@ export default function BrandChapter({
   const resolvedGlass = resolveGlass(brand, glass);
   const brandExtra = children ? <div data-chapter-extra="brand" className="space-y-10">{children}</div> : null;
   const switchConfig = switcher === false ? undefined : (switcher ?? DEFAULT_SWITCH[brand]);
+
+  if (onlyPart && overrides?.[onlyPart] !== null) {
+    return (
+      <PartOnlyView
+        brand={brand}
+        part={onlyPart}
+        overrides={overrides}
+        extras={extras}
+        glass={resolvedGlass}
+        switchConfig={switchConfig}
+        brandExtra={brandExtra}
+      />
+    );
+  }
 
   return (
     <SectionShell

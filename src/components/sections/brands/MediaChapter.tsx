@@ -1,4 +1,5 @@
 import BrandChapter from "./BrandChapter";
+import type { ChapterPartKey } from "./parts/shared";
 import BusinessLines from "./media/BusinessLines";
 import GlassRecipeLab from "./media/GlassRecipeLab";
 import GradientDemo from "./media/GradientDemo";
@@ -19,9 +20,9 @@ function GlassSignature() {
 }
 
 /** The GN Media department chapter: the shared template plus news-wire, glass, gradient, business-line and OG demos. */
-export default function MediaChapter() {
+export default function MediaChapter({ onlyPart }: { readonly onlyPart?: ChapterPartKey }) {
   return (
-    <BrandChapter brand="media" lead={LEAD}>
+    <BrandChapter brand="media" onlyPart={onlyPart} lead={LEAD}>
       <WireVoiceDemo />
       <GlassSignature />
       <GradientDemo />

@@ -1,5 +1,6 @@
 export { default as Badge } from "./Badge";
 export type { BadgeTone } from "./Badge";
+export { default as BrandThumb } from "./BrandThumb";
 export { default as Button } from "./Button";
 export type { ButtonVariant } from "./Button";
 export { default as ContrastTable } from "./ContrastTable";

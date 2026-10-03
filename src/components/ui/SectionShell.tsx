@@ -12,22 +12,25 @@ interface SectionShellProps {
   readonly brand?: BrandId;
   readonly children?: ReactNode;
   readonly className?: string;
+  /** Unmounted Deferred stub: heading only, so it is not exposed as an empty labelled landmark. */
+  readonly placeholder?: boolean;
 }
 
 /**
  * Numbered section frame. Header is a balanced two column grid (title left, lead right).
- * Sections other than the first use content-visibility:auto.
+ * Below-the-fold sections are mounted lazily by Deferred (measured placeholder heights), so no
+ * content-visibility tricks are needed here.
  */
-export default function SectionShell({ id, num, eyebrow, title, lead, brand, children, className }: SectionShellProps) {
+export default function SectionShell({ id, num, eyebrow, title, lead, brand, children, className, placeholder }: SectionShellProps) {
   const themed = brand !== undefined && brand !== "ventures";
   return (
     <section
       id={id}
       data-brand={brand}
-      aria-labelledby={`${id}-title`}
+      aria-labelledby={placeholder ? undefined : `${id}-title`}
+      aria-busy={placeholder || undefined}
       className={cn(
         "mb-[var(--section-gap)] scroll-mt-20",
-        num !== "01" && (themed ? "cv-auto-chapter" : "cv-auto"),
         themed && "brand-surface rounded-[1.5rem] border border-[var(--b-border)] p-5 sm:p-8 lg:p-12",
         brand === "commune" && "sk-dotted-bg",
         className,

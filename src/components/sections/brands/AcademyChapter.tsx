@@ -1,4 +1,5 @@
 import BrandChapter from "./BrandChapter";
+import type { ChapterPartKey } from "./parts/shared";
 import ColorRules from "./academy/ColorRules";
 import CredentialShowcase from "./academy/CredentialShowcase";
 import JourneyFlow from "./academy/JourneyFlow";
@@ -11,10 +12,11 @@ import TypeExtras from "./academy/TypeExtras";
  * and the extras prove the identity (oklch token ledger, gold reserved for verified credentials,
  * raised type scale, credential motifs). Section id "academy".
  */
-export default function AcademyChapter() {
+export default function AcademyChapter({ onlyPart }: { readonly onlyPart?: ChapterPartKey }) {
   return (
     <BrandChapter
       brand="academy"
+      onlyPart={onlyPart}
       eyebrow="Department, light first"
       extras={{
         essence: <ThemePair />,

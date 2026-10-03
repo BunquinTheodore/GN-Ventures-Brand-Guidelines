@@ -2,12 +2,16 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { createPlateStage, type PlateStageHandle, type PlateStatus } from '@/lib/three/plateStage';
+import BrandThumb from '@/components/ui/BrandThumb';
+import type { BrandId } from '@/content/types';
 import { usePrefersReducedMotion, useWebGLSupport } from './hooks';
 
 export interface LogoViewerItem {
   id: string;
   label: string;
   src: string;
+  /** Optional small thumbnail path; the picker falls back to BrandThumb by id. */
+  thumb?: string;
 }
 
 export interface LogoViewer3DProps {
@@ -108,8 +112,7 @@ export default function LogoViewer3D({ items }: LogoViewer3DProps) {
                   : 'color-mix(in srgb, currentColor 5%, transparent)',
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.src} alt="" width={24} height={24} loading="lazy" className="h-6 w-6 rounded-md object-cover" />
+              <BrandThumb brand={item.id as BrandId} src={item.thumb} size={24} />
               <span>{item.label}</span>
             </button>
           );

@@ -36,10 +36,10 @@ import { createStarfield } from './starfield';
 /** Overall luminance cap: everything is multiplied by this so text stays readable. */
 const DIM = 0.6;
 const CORE_COLOR = '#C6F24E';
-const TRAIL_SAMPLES = 48;
+const TRAIL_SAMPLES = 28;
 const TRAIL_ARC = 0.95;
 const TRAIL_WIDTH = 0.09;
-const RING_SEGMENTS = 160;
+const RING_SEGMENTS = 96;
 const BODY_RADIUS = 0.12;
 const NEAR_DISTANCE = 9.5;
 const FAR_DISTANCE = 15;
@@ -175,7 +175,7 @@ export function createBackgroundScene(pixelRatio: number): BackgroundScene {
   const scene = new Scene();
   const camera = new PerspectiveCamera(50, 1, 0.1, 400);
   const plane = new PlaneGeometry(1, 1);
-  const sphere = new SphereGeometry(BODY_RADIUS, 16, 12);
+  const sphere = new SphereGeometry(BODY_RADIUS, 12, 8);
   const stars = createStarfield(DIM, pixelRatio);
   scene.add(stars.group);
   const core = createCore(scene, plane);
@@ -187,6 +187,7 @@ export function createBackgroundScene(pixelRatio: number): BackgroundScene {
   const look = new Vector3();
   const focusPoint = new Vector3();
   const position = new Vector3();
+  const lookOffset = new Vector3();
   const state = { active: -1, pulse: 0, focusMix: 0, scroll: 0, px: 0, py: 0, distanceScale: 1 };
 
   const updateBodies = (dt: number, elapsed: number): void => {
@@ -245,7 +246,7 @@ export function createBackgroundScene(pixelRatio: number): BackgroundScene {
     const elevation = 0.3 - state.scroll * 0.12 + state.py * 0.06;
     const flat = Math.cos(elevation) * distance;
     position.set(Math.sin(azimuth) * flat + state.px * 0.55, Math.sin(elevation) * distance + state.py * 0.35, Math.cos(azimuth) * flat);
-    camera.position.copy(position).add(look.clone().multiplyScalar(0.35));
+    camera.position.copy(position).add(lookOffset.copy(look).multiplyScalar(0.35));
     const roll = state.scroll * 0.6;
     camera.up.set(Math.sin(roll), Math.cos(roll), 0);
     camera.lookAt(look);

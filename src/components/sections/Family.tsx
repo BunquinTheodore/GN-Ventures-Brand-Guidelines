@@ -59,7 +59,8 @@ function DepartmentCard({ id, index }: { readonly id: BrandId; readonly index: n
           alt={`${brand.name} logo`}
           width={logo.width ?? 512}
           height={logo.height ?? 512}
-          sizes="(min-width: 1024px) 18rem, 70vw"
+          sizes="240px"
+          loading="lazy"
           className="mx-auto h-40 w-auto rounded-xl object-contain"
         />
       ) : null}

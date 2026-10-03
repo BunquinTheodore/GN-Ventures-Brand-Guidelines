@@ -1,5 +1,5 @@
 import { PerspectiveCamera, Scene, type CanvasTexture } from 'three';
-import { fitDistance } from './math';
+import { fitDistance, nearestTurn } from './math';
 import { createPlate, PLATE_SIZE } from './plate';
 import { createPlateInput } from './plateInput';
 import {
@@ -7,6 +7,7 @@ import {
   plateRotation,
   stepPlateMotion,
   type PlateMotionConfig,
+  type PlateMotionState,
 } from './plateMotion';
 import { createStage } from './renderer';
 import { loadLogoTexture } from './textures';
@@ -38,6 +39,26 @@ const FIT_SIZE = PLATE_SIZE * 1.25;
 const SWAP_FLOURISH = 7.5;
 const FLOAT_AMPLITUDE = 0.03;
 
+const MAX_PLATE_DPR = 1.5;
+/** Below these the springs count as at rest (radians, radians per second). */
+const REST_POSITION_EPSILON = 0.0008;
+const REST_VELOCITY_EPSILON = 0.004;
+const SETTLE_VELOCITY = 0.04;
+
+function isStill(velocity: number): boolean {
+  return Math.abs(velocity) < REST_VELOCITY_EPSILON;
+}
+
+/** True while the plate still has motion to show; false lets the on-demand loop sleep. */
+function isPlateAnimating(state: PlateMotionState, config: PlateMotionConfig, dragging: boolean): boolean {
+  if (dragging) return true;
+  if (!state.interacted && config.autoRotate > 0) return true;
+  if (Math.abs(state.yawVelocity) >= SETTLE_VELOCITY || Math.abs(state.pitchOffset) > REST_POSITION_EPSILON) return true;
+  if (config.settle && state.interacted && Math.abs(state.yawTarget - nearestTurn(state.yawTarget)) > REST_POSITION_EPSILON) return true;
+  if (Math.abs(state.yaw.value - state.yawTarget) > REST_POSITION_EPSILON) return true;
+  return !(isStill(state.yaw.velocity) && isStill(state.tiltX.velocity) && isStill(state.tiltY.velocity));
+}
+
 const NOOP_HANDLE: PlateStageHandle = { setSrc() {}, nudge() {}, reset() {}, dispose() {} };
 
 /**
@@ -54,7 +75,9 @@ export function createPlateStage(options: PlateStageOptions): PlateStageHandle {
   const plate = createPlate();
   scene.add(plate.group, plate.lights);
 
-  const input = createPlateInput(container);
+  // The stage does not exist yet when input first fires, so wake through a late-bound ref.
+  let wake: () => void = () => undefined;
+  const input = createPlateInput(container, () => wake());
   const textures = new Map<string, CanvasTexture>();
   let motion = createPlateMotion();
   let pendingNudge = 0;
@@ -65,6 +88,8 @@ export function createPlateStage(options: PlateStageOptions): PlateStageHandle {
   const stage = createStage({
     container,
     antialias: true,
+    maxDpr: MAX_PLATE_DPR,
+    onDemand: true,
     reducedMotion: false,
     onResize(width, height) {
       camera.aspect = width / height;
@@ -79,11 +104,14 @@ export function createPlateStage(options: PlateStageOptions): PlateStageHandle {
       plate.group.rotation.set(rotation.x, rotation.y, Math.sin(elapsed * 0.6) * 0.015);
       plate.group.position.y = Math.sin(elapsed * 0.9) * FLOAT_AMPLITUDE;
       plate.setSheen(sampled.pointerX, sampled.pointerY, 0.7 + sampled.pointerX * 0.6 - sampled.pointerY * 0.3 + Math.sin(elapsed * 0.6) * 0.15);
+      return isPlateAnimating(motion, config, sampled.dragging);
     },
     render(renderer) {
       renderer.render(scene, camera);
     },
   });
+
+  if (stage) wake = stage.invalidate;
 
   if (!stage) {
     input.dispose();
@@ -96,6 +124,7 @@ export function createPlateStage(options: PlateStageOptions): PlateStageHandle {
     plate.setTexture(texture);
     if (hasTexture && mode === 'viewer') pendingNudge = SWAP_FLOURISH;
     hasTexture = true;
+    wake();
     onStatus('ready');
   };
 
@@ -127,6 +156,7 @@ export function createPlateStage(options: PlateStageOptions): PlateStageHandle {
     setSrc,
     nudge(velocity) {
       pendingNudge += velocity;
+      wake();
     },
     reset() {
       input.requestReset();

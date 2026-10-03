@@ -1,6 +1,7 @@
 import { Badge, Button, DerivedTag } from "@/components/ui";
 import type { BrandAsset } from "@/content/asset-types";
 import { MISSING_ASSETS, VECTOR_STATUS, assetsFor } from "@/content/assets";
+import { previewFor } from "@/content/previews";
 import { PartFrame, SubHeading, brandOf, dimensions, formatBytes, type ChapterPartProps } from "./shared";
 
 const PREVIEWABLE = new Set(["png", "jpg", "webp", "svg"]);
@@ -14,11 +15,13 @@ function Thumb({ asset }: { readonly asset: BrandAsset }) {
       </span>
     );
   }
+  // 320 px WebP preview (2 to 20 KB) instead of the full download file.
+  const preview = previewFor(asset.id);
   return (
     // Static brand files already sized for the web. A plain img keeps the table light.
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={asset.file}
+      src={preview?.src ?? asset.file}
       alt=""
       width={THUMB_PX}
       height={THUMB_PX}

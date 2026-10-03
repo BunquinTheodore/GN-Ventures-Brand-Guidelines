@@ -16,9 +16,12 @@ uniform vec3 uColor;
 uniform float uIntensity;
 varying vec2 vUv;
 void main() {
-  float d = length(vUv - 0.5) * 2.0;
-  float core = exp(-d * d * 9.0);
-  float halo = pow(max(1.0 - d, 0.0), 2.6);
+  vec2 p = (vUv - 0.5) * 2.0;
+  float t = max(1.0 - dot(p, p), 0.0);
+  float t2 = t * t;
+  float t4 = t2 * t2;
+  float core = t4 * t4;
+  float halo = t4 * t2;
   float a = min((core * 0.85 + halo * 0.32) * uIntensity, 0.6);
   gl_FragColor = vec4(uColor, a);
   ${COLORSPACE}
@@ -70,8 +73,8 @@ uniform float uDim;
 varying vec3 vColor;
 varying float vTwinkle;
 void main() {
-  float d = length(gl_PointCoord - 0.5);
-  float a = smoothstep(0.5, 0.05, d) * vTwinkle * uDim;
+  vec2 pc = gl_PointCoord - 0.5;
+  float a = smoothstep(0.25, 0.0025, dot(pc, pc)) * vTwinkle * uDim;
   gl_FragColor = vec4(vColor, a);
   ${COLORSPACE}
 }
